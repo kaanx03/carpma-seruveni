@@ -1,0 +1,184 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #2b8cee;
+  --color-coral-pink: #ff7f7f;
+  --color-mint-green: #50c878;
+  --color-sky-blue-light: #e0f2fe;
+  --font-family-display: 'Plus Jakarta Sans', sans-serif;
+}
+
+* {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 100%);
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2b8cee;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1a7ad9;
+}
+
+/* Map path background */
+.map-path {
+  background-image: radial-gradient(circle at 2px 2px, #cfdbe7 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(43, 140, 238, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(43, 140, 238, 0.7);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes pop {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+.animate-pop {
+  animation: pop 0.5s ease-out forwards;
+}
+
+.animate-bounce-gentle {
+  animation: bounce-gentle 1.5s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Button press effect */
+.btn-press {
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.btn-press:active {
+  transform: translateY(4px) !important;
+  box-shadow: none !important;
+}
+
+/* 3D Button */
+.btn-3d {
+  box-shadow: 0 8px 0 0 #e66b6b;
+  transition: all 0.1s;
+}
+
+.btn-3d:active {
+  box-shadow: none;
+  transform: translateY(4px);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #2b8cee 0%, #0066cc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(43, 140, 238, 0.15);
+}
+
+/* Level node styles */
+.level-node {
+  transition: transform 0.2s ease;
+}
+
+.level-node:hover {
+  transform: scale(1.1);
+}
+
+.level-node-active {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Input focus */
+input:focus {
+  outline: none;
+  border-color: #2b8cee !important;
+  box-shadow: 0 0 0 3px rgba(43, 140, 238, 0.2);
+}
+
+/* Number input - hide arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Material symbols filled */
+.material-symbols-filled {
+  font-variation-settings: 'FILL' 1;
+}
