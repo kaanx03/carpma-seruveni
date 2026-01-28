@@ -139,8 +139,8 @@ export default function Home() {
         </div>
       )}
 
-      {/* Logout Button */}
-      <div className="absolute top-4 right-4 z-10">
+      {/* Logout Button - Hidden at 768px and below */}
+      <div className="absolute top-4 right-4 z-10 hidden md:block">
         <button
           onClick={() => signOut()}
           className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm text-slate-600 font-bold rounded-xl shadow-lg hover:bg-white hover:text-red-500 transition-all cursor-pointer"

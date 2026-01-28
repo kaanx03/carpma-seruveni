@@ -54,6 +54,14 @@ export const getStudentsAsync = async (): Promise<Student[]> => {
 };
 
 export const saveStudentAsync = async (student: Student): Promise<Student | null> => {
+  // Mevcut kullanıcının ID'sini al
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    console.error('No authenticated user for saving student');
+    return null;
+  }
+
   const { data, error } = await supabase
     .from('students')
     .upsert({
@@ -64,6 +72,7 @@ export const saveStudentAsync = async (student: Student): Promise<Student | null
       wrongCount: student.wrongCount,
       totalStars: student.totalStars,
       avatarId: student.avatarId,
+      user_id: user.id,
     })
     .select()
     .single();

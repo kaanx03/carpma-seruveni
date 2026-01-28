@@ -117,46 +117,46 @@ export default function Canvas() {
   return (
     <div className="flex flex-col h-full">
       {/* Toolbar */}
-      <div className="flex items-center justify-between gap-4 px-4 py-3 bg-white border-b border-slate-200">
+      <div className="flex items-center justify-between gap-2 sm:gap-4 px-2 sm:px-4 py-2 sm:py-3 bg-white border-b border-slate-200 flex-wrap sm:flex-nowrap">
         {/* Tools */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <button
             onClick={() => setTool('pen')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all ${
+            className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-bold transition-all text-sm ${
               tool === 'pen'
                 ? 'bg-[#2b8cee] text-white shadow-lg shadow-[#2b8cee]/30'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <span className="material-symbols-outlined text-xl">edit</span>
-            <span className="hidden sm:inline">Kalem</span>
+            <span className="material-symbols-outlined text-lg sm:text-xl">edit</span>
+            <span className="hidden md:inline">Kalem</span>
           </button>
           <button
             onClick={() => setTool('eraser')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all ${
+            className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-bold transition-all text-sm ${
               tool === 'eraser'
                 ? 'bg-[#ff7e67] text-white shadow-lg shadow-[#ff7e67]/30'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <span className="material-symbols-outlined text-xl">ink_eraser</span>
-            <span className="hidden sm:inline">Silgi</span>
+            <span className="material-symbols-outlined text-lg sm:text-xl">ink_eraser</span>
+            <span className="hidden md:inline">Silgi</span>
           </button>
         </div>
 
         {/* Colors (only show when pen is selected) */}
         {tool === 'pen' && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-slate-500 hidden md:block">Renk:</span>
-            <div className="flex gap-1.5">
-              {colors.map((c) => (
+          <div className="flex items-center gap-1 sm:gap-2">
+            <span className="text-xs sm:text-sm font-bold text-slate-500 hidden lg:block">Renk:</span>
+            <div className="flex gap-1 sm:gap-1.5">
+              {colors.map((c, index) => (
                 <button
                   key={c.color}
                   onClick={() => setColor(c.color)}
                   title={c.name}
-                  className={`w-8 h-8 rounded-full transition-all hover:scale-110 ${
-                    color === c.color ? 'ring-2 ring-offset-2 ring-slate-400 scale-110' : ''
-                  }`}
+                  className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full transition-all hover:scale-110 ${
+                    color === c.color ? 'ring-2 ring-offset-1 sm:ring-offset-2 ring-slate-400 scale-110' : ''
+                  } ${index >= 5 ? 'max-[468px]:hidden' : ''}`}
                   style={{ backgroundColor: c.color }}
                 />
               ))}
@@ -164,13 +164,13 @@ export default function Canvas() {
           </div>
         )}
 
-        {/* Brush Size */}
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-bold text-slate-500 hidden md:block">
+        {/* Brush Size - Hidden at 468px and below */}
+        <div className="flex items-center gap-1 sm:gap-3 max-[468px]:hidden">
+          <span className="text-xs sm:text-sm font-bold text-slate-500 hidden lg:block">
             {tool === 'pen' ? 'Kalınlık:' : 'Boyut:'}
           </span>
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-slate-400 text-sm">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <span className="material-symbols-outlined text-slate-400 text-xs sm:text-sm hidden sm:block">
               {tool === 'pen' ? 'line_weight' : 'circle'}
             </span>
             <input
@@ -179,19 +179,19 @@ export default function Canvas() {
               max="20"
               value={brushSize}
               onChange={(e) => setBrushSize(Number(e.target.value))}
-              className="w-24 accent-[#2b8cee]"
+              className="w-16 sm:w-24 accent-[#2b8cee]"
             />
-            <span className="text-sm font-bold text-slate-500 w-6">{brushSize}</span>
+            <span className="text-xs sm:text-sm font-bold text-slate-500 w-5 sm:w-6">{brushSize}</span>
           </div>
         </div>
 
         {/* Clear Button */}
         <button
           onClick={clearCanvas}
-          className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-colors"
+          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg sm:rounded-xl transition-colors text-sm"
         >
-          <span className="material-symbols-outlined text-xl">delete</span>
-          <span className="hidden sm:inline">Temizle</span>
+          <span className="material-symbols-outlined text-lg sm:text-xl">delete</span>
+          <span className="hidden md:inline">Temizle</span>
         </button>
       </div>
 
@@ -225,17 +225,17 @@ export default function Canvas() {
         />
 
         {/* Tool Indicator */}
-        <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-2 bg-white/90 backdrop-blur rounded-full shadow-lg border border-slate-200">
-          <span className="material-symbols-outlined text-lg" style={{ color: tool === 'pen' ? color : '#ff7e67' }}>
+        <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white/90 backdrop-blur rounded-full shadow-lg border border-slate-200">
+          <span className="material-symbols-outlined text-base sm:text-lg" style={{ color: tool === 'pen' ? color : '#ff7e67' }}>
             {tool === 'pen' ? 'edit' : 'ink_eraser'}
           </span>
-          <span className="text-sm font-bold text-slate-600">
-            {tool === 'pen' ? 'Kalem Modu' : 'Silgi Modu'}
+          <span className="text-xs sm:text-sm font-bold text-slate-600">
+            {tool === 'pen' ? 'Kalem' : 'Silgi'}
           </span>
         </div>
 
         {/* Help Text */}
-        <div className="absolute bottom-4 right-4 text-sm font-medium text-slate-400">
+        <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 text-xs sm:text-sm font-medium text-slate-400 hidden sm:block">
           Çözüm için buraya yazın
         </div>
       </div>
