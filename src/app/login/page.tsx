@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 
 export default function LoginPage() {
@@ -117,6 +118,13 @@ export default function LoginPage() {
               </>
             )}
           </button>
+
+          <p className="text-center text-xs sm:text-sm text-slate-500 pt-1">
+            Hesabın yok mu?{' '}
+            <Link href="/signup" className="font-bold text-orange-500 hover:text-orange-600 transition-colors">
+              Kayıt Ol
+            </Link>
+          </p>
         </form>
       </div>
     </div>

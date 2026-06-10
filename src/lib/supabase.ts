@@ -18,7 +18,7 @@ export interface Student {
   created_at?: string;
 }
 
-// Avatar listesi - doğa temasına uygun renkler
+// Avatars — nature-themed color gradients
 export const AVATARS = [
   { id: 0, emoji: '🐰', bg: 'from-amber-500 to-amber-600', name: 'Tavşan' },
   { id: 1, emoji: '🦊', bg: 'from-orange-500 to-amber-600', name: 'Tilki' },
@@ -38,11 +38,14 @@ export const AVATARS = [
   { id: 15, emoji: '🐲', bg: 'from-green-600 to-emerald-700', name: 'Ejderha' },
 ];
 
-// Supabase fonksiyonları (async)
 export const getStudentsAsync = async (): Promise<Student[]> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
   const { data, error } = await supabase
     .from('students')
     .select('*')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: true });
 
   if (error) {
@@ -54,7 +57,7 @@ export const getStudentsAsync = async (): Promise<Student[]> => {
 };
 
 export const saveStudentAsync = async (student: Student): Promise<Student | null> => {
-  // Mevcut kullanıcının ID'sini al
+  // Get the current authenticated user's ID
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -86,7 +89,7 @@ export const saveStudentAsync = async (student: Student): Promise<Student | null
 };
 
 export const createStudentAsync = async (name: string, avatarId?: number): Promise<Student | null> => {
-  // Mevcut kullanıcının ID'sini al
+  // Get the current authenticated user's ID
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -166,10 +169,14 @@ export const updateStudentNameAsync = async (id: string, newName: string): Promi
 };
 
 export const getStudentByIdAsync = async (id: string): Promise<Student | null> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
   const { data, error } = await supabase
     .from('students')
     .select('*')
     .eq('id', id)
+    .eq('user_id', user.id)
     .single();
 
   if (error) {
@@ -178,47 +185,4 @@ export const getStudentByIdAsync = async (id: string): Promise<Student | null> =
   }
 
   return data;
-};
-
-// Eski senkron fonksiyonlar (geriye uyumluluk için - artık kullanılmıyor)
-export const getStudents = (): Student[] => {
-  console.warn('getStudents is deprecated, use getStudentsAsync instead');
-  return [];
-};
-
-export const saveStudent = (student: Student): void => {
-  console.warn('saveStudent is deprecated, use saveStudentAsync instead');
-  saveStudentAsync(student);
-};
-
-export const createStudent = (name: string, avatarId?: number): Student => {
-  console.warn('createStudent is deprecated, use createStudentAsync instead');
-  const student: Student = {
-    id: crypto.randomUUID(),
-    name,
-    currentLevel: 1,
-    correctCount: 0,
-    wrongCount: 0,
-    totalStars: 0,
-    avatarId: avatarId ?? Math.floor(Math.random() * AVATARS.length),
-  };
-  createStudentAsync(name, avatarId);
-  return student;
-};
-
-export const updateStudentAvatar = (id: string, avatarId: number): Student | undefined => {
-  console.warn('updateStudentAvatar is deprecated, use updateStudentAvatarAsync instead');
-  updateStudentAvatarAsync(id, avatarId);
-  return undefined;
-};
-
-export const deleteStudent = (id: string): void => {
-  console.warn('deleteStudent is deprecated, use deleteStudentAsync instead');
-  deleteStudentAsync(id);
-};
-
-export const updateStudentName = (id: string, newName: string): Student | undefined => {
-  console.warn('updateStudentName is deprecated, use updateStudentNameAsync instead');
-  updateStudentNameAsync(id, newName);
-  return undefined;
 };

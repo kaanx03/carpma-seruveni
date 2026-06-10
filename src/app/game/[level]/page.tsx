@@ -19,7 +19,6 @@ const generateQuestions = (level: number): Question[] => {
   const questions: Question[] = [];
   const questionCount = 10;
 
-  // Rastgele sayı üretme fonksiyonu
   const randomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
@@ -30,7 +29,7 @@ const generateQuestions = (level: number): Question[] => {
 
     switch (level) {
       case 1:
-        // İki basamaklı × tek basamaklı, sonuç < 100 (2 basamaklı)
+        // 2-digit × 1-digit, result < 100
         do {
           n1 = randomInt(10, 99);
           n2 = randomInt(2, 9);
@@ -39,7 +38,7 @@ const generateQuestions = (level: number): Question[] => {
         break;
 
       case 2:
-        // İki basamaklı × tek basamaklı, sonuç 100-300 arası
+        // 2-digit × 1-digit, result 100–300
         do {
           n1 = randomInt(10, 99);
           n2 = randomInt(2, 9);
@@ -48,14 +47,14 @@ const generateQuestions = (level: number): Question[] => {
         break;
 
       case 3:
-        // Üç basamaklı × tek basamaklı
+        // 3-digit × 1-digit
         n1 = randomInt(100, 999);
         n2 = randomInt(2, 9);
         result = n1 * n2;
         break;
 
       case 4:
-        // İki basamaklı × iki basamaklı, sonuç 100-1000 arası
+        // 2-digit × 2-digit, result 100–1000
         do {
           n1 = randomInt(10, 99);
           n2 = randomInt(10, 99);
@@ -91,12 +90,13 @@ export default function GamePage() {
   const level = Number(params.level) || 1;
   const studentId = searchParams.get('studentId');
 
-  // Auth kontrolü - giriş yapmamışsa login sayfasına yönlendir
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/giris');
-    }
+    if (!authLoading && !user) router.push('/login');
   }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (level < 1 || level > 4) router.push('/');
+  }, [level, router]);
 
   const [phase, setPhase] = useState<GamePhase>('intro');
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -109,10 +109,10 @@ export default function GamePage() {
   const [student, setStudent] = useState<Student | null>(null);
   const [showFeedback, setShowFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [lives, setLives] = useState(5);
-  const [hintLevel, setHintLevel] = useState(0); // Her soru için kaç kez ipucu kullanıldı
-  const [tutorialShown, setTutorialShown] = useState(false); // Tutorial hiç gösterildi mi
+  const [hintLevel, setHintLevel] = useState(0); // number of hints used for the current question
+  const [tutorialShown, setTutorialShown] = useState(false); // whether the tutorial has ever been shown
   const [showTutorial, setShowTutorial] = useState(false);
-  const [isAnswerChecked, setIsAnswerChecked] = useState(false); // Cevap kontrol edildi mi (art arda basmayı engellemek için)
+  const [isAnswerChecked, setIsAnswerChecked] = useState(false); // prevents double-submission
 
   const playSound = useCallback((isCorrect: boolean) => {
     const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
@@ -129,6 +129,7 @@ export default function GamePage() {
     oscillator.start();
     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
     oscillator.stop(audioContext.currentTime + 0.3);
+    oscillator.onended = () => audioContext.close();
   }, []);
 
   useEffect(() => {
@@ -159,21 +160,21 @@ export default function GamePage() {
   const useHint = () => {
     if (!currentQuestion) return;
 
-    // Tutorial hiç gösterilmediyse önce onu göster
+    // Show the tutorial the first time the hint button is pressed
     if (!tutorialShown) {
       setTutorialShown(true);
       setShowTutorial(true);
       return;
     }
 
-    // Tutorial gösterildiyse basamakları aç (sağdan sola: birler, onlar, yüzler...)
+    // Reveal answer digits right-to-left (ones, tens, hundreds…)
     const newHintLevel = hintLevel + 1;
     setHintLevel(newHintLevel);
 
-    // answer dizisi ters sırada saklanıyor (index 0 = birler, index 1 = onlar...)
-    // resultDigits normal sırada (index 0 = en soldaki basamak)
-    const answerIndex = newHintLevel - 1; // 0, 1, 2... (sağdan sola)
-    const digitIndex = resultDigits.length - newHintLevel; // son, sondan bir önceki... (sağdan sola)
+    // answer[] is stored right-to-left (index 0 = ones digit)
+    // resultDigits[] is stored left-to-right (index 0 = most significant digit)
+    const answerIndex = newHintLevel - 1; // 0, 1, 2… (right to left)
+    const digitIndex = resultDigits.length - newHintLevel; // last, second-to-last… (right to left)
 
     if (answerIndex >= 0 && answerIndex < resultDigits.length && digitIndex >= 0) {
       const newAnswer = [...answer];
@@ -199,13 +200,10 @@ export default function GamePage() {
   };
 
   const checkAnswer = () => {
-    // Eğer cevap zaten kontrol edildiyse tekrar kontrol etme
     if (isAnswerChecked) return;
-
-    // Hemen flag'i set et - çift tıklamayı engelle
     setIsAnswerChecked(true);
 
-    // answer dizisi ters sırada (sağdan sola) saklandığı için reverse ediyoruz
+    // answer[] is stored right-to-left, reverse before comparing
     const userAnswer = [...answer].reverse().join('');
     const correctAnswer = String(currentQuestion.result);
 
@@ -224,7 +222,7 @@ export default function GamePage() {
         if (currentIndex < questions.length - 1) {
           setCurrentIndex(prev => prev + 1);
         } else {
-          finishGame(true);
+          finishGame(true, correctCount + 1, wrongCount);
         }
       }, 1000);
     } else {
@@ -233,50 +231,34 @@ export default function GamePage() {
       setWrongCount(prev => prev + 1);
       setLives(prev => prev - 1);
 
-      // Yanlış cevap verildiğinde cevap alanını temizle
       setAnswer(new Array(resultDigits.length).fill(''));
       setCarry('');
 
-      // Mevcut lives değerini yakala (closure sorunu için)
       const currentLives = lives;
 
       setTimeout(() => {
         setShowFeedback(null);
-        // Tekrar deneme için flag'i sıfırla
         setIsAnswerChecked(false);
         if (currentLives <= 1) {
-          finishGame(false);
+          finishGame(false, correctCount, wrongCount + 1);
         }
       }, 500);
     }
   };
 
-  const finishGame = async (won: boolean) => {
-    if (student && won) {
+  const finishGame = async (won: boolean, finalCorrect: number, finalWrong: number) => {
+    if (student) {
       const updatedStudent: Student = {
         ...student,
-        correctCount: student.correctCount + correctCount,
-        wrongCount: student.wrongCount + wrongCount,
+        correctCount: student.correctCount + finalCorrect,
+        wrongCount: student.wrongCount + finalWrong,
         totalStars: student.totalStars + stars.filter(Boolean).length,
-        currentLevel: Math.max(student.currentLevel, level + 1),
+        currentLevel: won ? Math.min(Math.max(student.currentLevel, level + 1), 4) : student.currentLevel,
       };
       await saveStudentAsync(updatedStudent);
       setStudent(updatedStudent);
-      setPhase('win');
-    } else {
-      if (student) {
-        const updatedStudent: Student = {
-          ...student,
-          correctCount: student.correctCount + correctCount,
-          wrongCount: student.wrongCount + wrongCount,
-          totalStars: student.totalStars + stars.filter(Boolean).length,
-          // Canlar bittiğinde level'ı artırma
-        };
-        await saveStudentAsync(updatedStudent);
-        setStudent(updatedStudent);
-      }
-      setPhase('lose');
     }
+    setPhase(won ? 'win' : 'lose');
   };
 
   const levelTitles: Record<number, string> = {
@@ -293,7 +275,6 @@ export default function GamePage() {
     4: { from: '#9b59b6', to: '#8e44ad' },
   };
 
-  // Auth yüklenirken veya kullanıcı yoksa loading göster
   if (authLoading || !user) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-slate-100 to-white">
@@ -507,7 +488,7 @@ export default function GamePage() {
             </div>
           </main>
 
-          {/* Tutorial Modal - Sabit örnek: 23 × 4 = 92 */}
+          {/* Tutorial Modal - fixed example: 23 × 4 = 92 */}
           {showTutorial && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-3 sm:p-4" onClick={() => setShowTutorial(false)}>
               <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-lg w-full p-4 sm:p-6 animate-pop max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
@@ -587,7 +568,8 @@ export default function GamePage() {
                   setCurrentIndex(prev => prev + 1);
                 }
               }}
-              className="flex items-center gap-1 sm:gap-2 text-slate-500 hover:text-[#2b8cee] transition-colors font-bold text-xs sm:text-sm"
+              disabled={currentIndex >= questions.length - 1}
+              className="flex items-center gap-1 sm:gap-2 text-slate-500 hover:text-[#2b8cee] transition-colors font-bold text-xs sm:text-sm disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <span className="material-symbols-outlined text-lg sm:text-xl">skip_next</span>
               <span className="hidden sm:inline">GEÇ</span>
@@ -661,7 +643,7 @@ export default function GamePage() {
               </button>
               {level < 4 && (
                 <button
-                  onClick={() => router.push(`/oyun/${level + 1}?studentId=${studentId}`)}
+                  onClick={() => router.push(`/game/${level + 1}?studentId=${studentId}`)}
                   className="px-6 sm:px-8 md:px-10 py-3 sm:py-4 md:py-5 bg-white/20 backdrop-blur text-white text-base sm:text-lg md:text-xl font-black rounded-xl sm:rounded-2xl hover:bg-white/30 transition-all"
                 >
                   Sonraki Level'a Geç
@@ -725,6 +707,7 @@ export default function GamePage() {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                 <button
                   onClick={() => {
+                    setQuestions(generateQuestions(level));
                     setPhase('intro');
                     setCurrentIndex(0);
                     setCorrectCount(0);

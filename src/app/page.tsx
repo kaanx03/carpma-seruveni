@@ -20,23 +20,33 @@ export default function Home() {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [selectedAvatarId, setSelectedAvatarId] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
-  // Auth kontrolü - giriş yapmamışsa login sayfasına yönlendir
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/giris');
+      router.push('/login');
     }
   }, [user, authLoading, router]);
 
   const refreshStudents = useCallback(async () => {
     const data = await getStudentsAsync();
+    if (data.length === 0) {
+      setFetchError(false);
+    }
     setStudents(data);
   }, []);
 
   useEffect(() => {
     setMounted(true);
-    refreshStudents().then(() => setLoading(false));
-  }, [refreshStudents]);
+    getStudentsAsync().then(data => {
+      setStudents(data);
+      setFetchError(false);
+      setLoading(false);
+    }).catch(() => {
+      setFetchError(true);
+      setLoading(false);
+    });
+  }, []);
 
   const filteredStudents = useMemo(() => {
     if (!searchQuery.trim()) return students;
@@ -93,7 +103,7 @@ export default function Home() {
 
   const startGame = () => {
     if (selectedStudent) {
-      router.push(`/oyun/${selectedStudent.currentLevel}?studentId=${selectedStudent.id}`);
+      router.push(`/game/${selectedStudent.currentLevel}?studentId=${selectedStudent.id}`);
     }
   };
 
@@ -154,7 +164,7 @@ export default function Home() {
       <main className="flex-1 flex items-start md:items-center justify-center min-h-0 pt-4 md:pt-[8%] overflow-auto">
         <div className="h-auto md:h-[72%] w-[92%] max-w-[1000px] flex flex-col md:flex-row gap-4 py-4 md:py-0">
 
-          {/* Sol Panel - Öğrenci Listesi */}
+          {/* Left Panel - Student List */}
           <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-2xl border-4 border-white/50 flex flex-col overflow-hidden w-full md:w-[45%] min-w-0 md:min-w-[280px] min-h-[300px] md:min-h-0">
             {/* Panel Header */}
             <div className="flex-shrink-0 px-4 py-3 border-b border-orange-200 flex items-center justify-between bg-gradient-to-r from-orange-400 to-amber-400">
@@ -224,6 +234,7 @@ export default function Home() {
                       onChange={(e) => setNewStudentName(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAddStudent()}
                       placeholder="Öğrenci adı..."
+                      maxLength={40}
                       className="w-full px-3 py-2 bg-white border border-orange-200 rounded-lg text-sm font-medium text-slate-700 placeholder-slate-400 focus:border-orange-400 focus:outline-none"
                       autoFocus
                     />
@@ -241,7 +252,16 @@ export default function Home() {
 
             {/* Student List */}
             <div className="flex-1 overflow-y-auto p-2 min-h-0">
-              {filteredStudents.length === 0 ? (
+              {fetchError ? (
+                <div className="h-full flex flex-col items-center justify-center text-center p-4">
+                  <span className="material-symbols-outlined text-5xl text-red-300 mb-3">cloud_off</span>
+                  <h3 className="text-base font-bold text-slate-600 mb-1">Bağlantı hatası</h3>
+                  <p className="text-slate-400 text-sm mb-3">Öğrenciler yüklenemedi</p>
+                  <button onClick={() => refreshStudents()} className="px-3 py-1.5 bg-orange-500 text-white text-sm font-bold rounded-lg hover:bg-orange-600 cursor-pointer">
+                    Tekrar Dene
+                  </button>
+                </div>
+              ) : filteredStudents.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center p-4">
                   {students.length === 0 ? (
                     <>
@@ -301,6 +321,7 @@ export default function Home() {
                                 if (e.key === 'Enter') handleEditStudent(student.id);
                                 if (e.key === 'Escape') { setEditingStudent(null); setEditName(''); }
                               }}
+                              maxLength={40}
                               className="flex-1 px-2 py-1.5 bg-white border-2 border-orange-400 rounded text-sm font-medium text-slate-700 focus:outline-none"
                               autoFocus
                             />
@@ -361,7 +382,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Sağ Panel - Öğrenci Detayı */}
+          {/* Right Panel - Student Detail */}
           <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-2xl border-4 border-white/50 flex flex-col overflow-hidden flex-1 min-h-[350px] md:min-h-0">
             {selectedStudent ? (
               <>
@@ -421,7 +442,7 @@ export default function Home() {
                       return (
                         <button
                           key={level}
-                          onClick={() => isUnlocked && router.push(`/oyun/${level}?studentId=${selectedStudent.id}`)}
+                          onClick={() => isUnlocked && router.push(`/game/${level}?studentId=${selectedStudent.id}`)}
                           disabled={!isUnlocked}
                           className={`relative p-3 rounded-lg font-bold transition-all ${
                             isCurrent

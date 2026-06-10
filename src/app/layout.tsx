@@ -3,8 +3,8 @@ import './globals.css';
 import { AuthProvider } from '@/lib/auth';
 
 export const metadata: Metadata = {
-  title: 'Çarpma Serüveni - Matematik Oyunu',
-  description: 'Çocuklar için eğlenceli çarpma öğrenme oyunu',
+  title: 'Çarpma Serüveni - Math Game',
+  description: 'A fun multiplication learning game for primary school students',
 };
 
 export default function RootLayout({
