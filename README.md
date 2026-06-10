@@ -2,6 +2,8 @@
 
 An interactive **Turkish multiplication game** designed for primary school math teachers. Teachers create accounts, manage their students, track each student's progress, and launch the game at the correct difficulty level with a single click.
 
+**🌐 Live Demo: [carpmaseruveni.online](https://www.carpmaseruveni.online/)**
+
 ---
 
 ## Screenshots
